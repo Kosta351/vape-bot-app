@@ -3,173 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bermuda Premium</title>
+    <title>Bermuda Shop</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg: #08090a;
-            --card: #121316;
-            --accent: #007aff;
-            --text: #ffffff;
-            --muted: #8e8e93;
-            --glass: rgba(255, 255, 255, 0.05);
-        }
-
-        body {
-            background: var(--bg); color: var(--text);
-            font-family: 'Manrope', sans-serif; margin: 0; padding: 20px;
-            padding-bottom: 120px; -webkit-tap-highlight-color: transparent;
-        }
-
-        /* Профиль */
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-        .profile-btn {
-            background: var(--glass); padding: 10px 18px; border-radius: 20px;
-            display: flex; align-items: center; gap: 10px; border: 1px solid rgba(255,255,255,0.1);
-        }
-        .avatar { width: 30px; height: 30px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; }
-
-        /* Поиск */
-        .search { background: var(--card); border-radius: 16px; padding: 14px; margin-bottom: 25px; border: 1px solid var(--glass); }
-        .search input { background: transparent; border: none; color: white; width: 100%; outline: none; }
-
-        /* Сетка */
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .card { 
-            background: var(--card); border-radius: 24px; padding: 12px; 
-            border: 1px solid var(--glass); position: relative;
-        }
-        .card img { width: 100%; aspect-ratio: 1; border-radius: 18px; object-fit: cover; margin-bottom: 10px; }
-        .card h3 { font-size: 15px; margin: 0 0 8px; font-weight: 600; }
-        .price { font-weight: 800; color: var(--accent); font-size: 16px; }
+        :root { --bg: #08090a; --card: #121316; --accent: #007aff; --text: #ffffff; --muted: #8e8e93; --glass: rgba(255, 255, 255, 0.05); }
+        body { background: var(--bg); color: var(--text); font-family: 'Manrope', sans-serif; margin: 0; padding: 20px; padding-bottom: 120px; overflow-x: hidden; }
         
-        .fav-btn { position: absolute; top: 20px; right: 20px; font-size: 20px; color: rgba(255,255,255,0.2); }
-        .fav-btn.active { color: #ff3b30; }
-
-        /* Модалка вкусов */
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; z-index: 1000; }
-        .modal { 
-            position: fixed; bottom: -100%; left: 0; width: 100%; 
-            background: #18181b; border-radius: 30px 30px 0 0; 
-            padding: 30px; box-sizing: border-box; transition: 0.4s ease; z-index: 1001; 
-        }
-        .modal.active { bottom: 0; }
-        .flavor-item { 
-            background: var(--glass); padding: 15px; border-radius: 15px; margin-bottom: 10px;
-            display: flex; justify-content: space-between; border: 1px solid transparent;
-        }
-        .flavor-item.selected { border-color: var(--accent); background: rgba(0,122,255,0.1); }
-
-        .btn-main { 
-            background: var(--accent); color: white; border: none; width: 100%; 
-            padding: 20px; border-radius: 20px; font-weight: 800; font-size: 16px; margin-top: 20px;
-        }
-
-        /* Экран профиля */
-        .screen-profile {
-            position: fixed; top: 0; left: 100%; width: 100%; height: 100%;
-            background: var(--bg); z-index: 2000; transition: 0.3s; padding: 25px; box-sizing: border-box;
-        }
-        .screen-profile.active { left: 0; }
+        /* Сетка товаров */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .card { background: var(--card); border-radius: 24px; padding: 12px; border: 1px solid var(--glass); }
+        .card img { width: 100%; aspect-ratio: 1; border-radius: 18px; object-fit: cover; }
+        .price { font-weight: 800; color: var(--accent); margin-top: 5px; }
 
         /* Плавающая корзина */
-        .cart-bar {
-            position: fixed; bottom: 30px; left: 20px; right: 20px;
-            background: var(--accent); padding: 20px; border-radius: 20px;
-            display: none; justify-content: space-between; font-weight: 800; z-index: 900;
-        }
+        .cart-bar { position: fixed; bottom: 30px; left: 20px; right: 20px; background: var(--accent); padding: 20px; border-radius: 20px; display: none; justify-content: space-between; font-weight: 800; z-index: 900; box-shadow: 0 10px 30px rgba(0,122,255,0.3); }
+
+        /* Экран КОРЗИНЫ */
+        .screen { position: fixed; top: 0; left: 100%; width: 100%; height: 100%; background: var(--bg); z-index: 2000; transition: 0.3s; padding: 25px; box-sizing: border-box; overflow-y: auto; }
+        .screen.active { left: 0; }
+        .cart-item { background: var(--card); padding: 15px; border-radius: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--glass); }
+        
+        /* Модалка выбора вкуса */
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; z-index: 1000; }
+        .modal { position: fixed; bottom: -100%; left: 0; width: 100%; background: #18181b; border-radius: 30px 30px 0 0; padding: 30px; box-sizing: border-box; transition: 0.4s ease; z-index: 1001; }
+        .modal.active { bottom: 0; }
+        .flavor-item { background: var(--glass); padding: 15px; border-radius: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; }
+        .flavor-item.selected { border: 1px solid var(--accent); background: rgba(0,122,255,0.1); }
+
+        .btn-pay { background: var(--accent); color: white; border: none; width: 100%; padding: 20px; border-radius: 20px; font-weight: 800; font-size: 16px; margin-top: 20px; }
     </style>
 </head>
 <body>
 
-    <div id="main-view">
-        <div class="header">
-            <h1 style="margin: 0; font-size: 24px; font-weight: 800;">Bermuda Shop</h1>
-            <div class="profile-btn" onclick="openProfile()">
-                <div class="avatar" id="avatar">K</div>
-                <span id="user-name">Костя</span>
-            </div>
-        </div>
-
-        <div class="search"><input type="text" placeholder="Поиск жижек..."></div>
-
-        <h2 style="font-size: 18px; margin-bottom: 15px;">Только Жижки</h2>
-        <div class="grid" id="grid">
-            <p style="color: var(--muted)">Загрузка ассортимента...</p>
-        </div>
-    </div>
-
-    <!-- Профиль -->
-    <div class="screen-profile" id="profile-screen">
-        <div onclick="closeProfile()" style="color: var(--accent); font-weight: 800; margin-bottom: 30px;">❮ МАГАЗИН</div>
-        <h2>Мой кабинет</h2>
-        <div class="flavor-item" style="padding: 25px;">📋 Мои заказы <span>0</span></div>
-        <div class="flavor-item" style="padding: 25px;">❤️ Избранное <span>0</span></div>
+    <!-- Главная -->
+    <div id="home-view">
+        <h1 style="font-weight: 800;">Bermuda</h1>
+        <div class="grid" id="product-grid"></div>
     </div>
 
     <!-- Корзина -->
-    <div class="cart-bar" id="cart-bar">
-        <span>В КОРЗИНЕ: <span id="cart-count">0</span> ШТ.</span>
-        <span id="cart-total">0 ₽ ❯</span>
+    <div class="screen" id="cart-screen">
+        <div onclick="closeCart()" style="color: var(--accent); font-weight: 800; margin-bottom: 30px;">❮ НАЗАД</div>
+        <h2 style="font-size: 28px; margin-bottom: 20px;">Моя корзина</h2>
+        <div id="cart-items-list"></div>
+        <div id="cart-total-info" style="margin-top: 20px; font-size: 20px; font-weight: 800; text-align: right;"></div>
+        <button class="btn-pay" onclick="sendOrder()">ОФОРМИТЬ И ОПЛАТИТЬ</button>
     </div>
 
-    <!-- Модалка -->
+    <div class="cart-bar" id="cart-bar" onclick="openCart()">
+        <span>КОРЗИНА: <span id="bar-count">0</span></span>
+        <span id="bar-total">0 ₽ ❯</span>
+    </div>
+
+    <!-- Модалка вкуса -->
     <div class="overlay" id="overlay" onclick="closeModal()"></div>
     <div class="modal" id="modal">
-        <div style="width: 40px; height: 4px; background: #333; margin: 0 auto 20px; border-radius: 2px;"></div>
-        <h2 id="m-name">Выбор вкуса</h2>
+        <h2 id="m-name">Вкус</h2>
         <div id="m-flavors"></div>
-        <button class="btn-main" onclick="confirmAdd()">Добавить в корзину</button>
+        <button class="btn-pay" onclick="confirmAdd()">ДОБАВИТЬ В КОРЗИНУ</button>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.expand();
-
         let products = [];
         let cart = [];
         let selectedProduct = null;
-        let favs = JSON.parse(localStorage.getItem('favs')) || [];
 
-        // ССЫЛКА НА ТВОЙ API (замени на ngrok если тестишь локально)
-        const API_URL = 'http://localhost:8080/api/products';
-
-        async function fetchProducts() {
+        // Загрузка товаров
+        async function load() {
             try {
-                const res = await fetch(API_URL);
+                const res = await fetch('http://localhost:8080/api/products');
                 products = await res.json();
-                render();
-            } catch (e) {
-                // Если сервер не запущен, покажем демо
-                products = [{id:1, name:"DEMO ANARCHY", price:450, img:"https://via.placeholder.com/300", flavors:["Яблоко","Манго"]}];
-                render();
+            } catch(e) {
+                products = [{id:1, name:"ANARCHY V2", price:450, img:"https://via.placeholder.com/300", flavors:["Манго","Ананас"]}];
             }
+            render();
         }
 
         function render() {
-            const grid = document.getElementById('grid');
-            grid.innerHTML = products.map(p => {
-                const isFav = favs.includes(p.id) ? 'active' : '';
-                return `
-                    <div class="card" onclick="openProduct(${p.id})">
-                        <span class="fav-btn ${isFav}" onclick="event.stopPropagation(); toggleFav(${p.id})">❤</span>
-                        <img src="${p.img}">
-                        <h3>${p.name}</h3>
-                        <div class="price">${p.price} ₽</div>
-                    </div>
-                `}).join('');
+            const grid = document.getElementById('product-grid');
+            grid.innerHTML = products.map(p => `
+                <div class="card" onclick="openModal(${p.id})">
+                    <img src="${p.img}">
+                    <div style="font-weight: 600; margin-top: 10px;">${p.name}</div>
+                    <div class="price">${p.price} ₽</div>
+                </div>
+            `).join('');
         }
 
-        function openProduct(id) {
+        function openModal(id) {
             selectedProduct = products.find(p => p.id === id);
             document.getElementById('m-name').innerText = selectedProduct.name;
-            const flavorsDiv = document.getElementById('m-flavors');
-            flavorsDiv.innerHTML = selectedProduct.flavors.map((f, i) => `
-                <div class="flavor-item ${i===0?'selected':''}" onclick="selectFlavor(this)">
-                    <span>${f}</span>
-                    <span>✓</span>
-                </div>
+            document.getElementById('m-flavors').innerHTML = selectedProduct.flavors.map((f, i) => `
+                <div class="flavor-item ${i===0?'selected':''}" onclick="selectFlavor(this)"><span>${f}</span></div>
             `).join('');
             document.getElementById('overlay').style.display = 'block';
             document.getElementById('modal').classList.add('active');
@@ -178,49 +105,51 @@
         function selectFlavor(el) {
             document.querySelectorAll('.flavor-item').forEach(i => i.classList.remove('selected'));
             el.classList.add('selected');
-            tg.HapticFeedback.selectionChanged();
         }
 
         function confirmAdd() {
             const flavor = document.querySelector('.flavor-item.selected span').innerText;
-            cart.push({...selectedProduct, flavor});
-            updateCart();
+            cart.push({ name: selectedProduct.name, price: selectedProduct.price, flavor: flavor });
+            updateBar();
             closeModal();
-            tg.HapticFeedback.notificationOccurred('success');
+            tg.HapticFeedback.impactOccurred('medium');
         }
 
-        function updateCart() {
+        function updateBar() {
             const bar = document.getElementById('cart-bar');
             bar.style.display = cart.length ? 'flex' : 'none';
-            document.getElementById('cart-count').innerText = cart.length;
+            document.getElementById('bar-count').innerText = cart.length;
             const total = cart.reduce((s, i) => s + i.price, 0);
-            document.getElementById('cart-total').innerText = total + ' ₽ ❯';
+            document.getElementById('bar-total').innerText = total + ' ₽ ❯';
         }
 
-        function toggleFav(id) {
-            if(favs.includes(id)) favs = favs.filter(i => i !== id);
-            else favs.push(id);
-            localStorage.setItem('favs', JSON.stringify(favs));
-            render();
-            tg.HapticFeedback.impactOccurred('light');
+        function openCart() {
+            const list = document.getElementById('cart-items-list');
+            list.innerHTML = cart.map((item, idx) => `
+                <div class="cart-item">
+                    <div>
+                        <div style="font-weight: 800;">${item.name}</div>
+                        <div style="color: var(--muted); font-size: 13px;">Вкус: ${item.flavor}</div>
+                    </div>
+                    <div style="font-weight: 800;">${item.price} ₽</div>
+                </div>
+            `).join('');
+            const total = cart.reduce((s, i) => s + i.price, 0);
+            document.getElementById('cart-total-info').innerText = 'Итого: ' + total + ' ₽';
+            document.getElementById('cart-screen').classList.add('active');
         }
 
-        function closeModal() {
-            document.getElementById('overlay').style.display = 'none';
-            document.getElementById('modal').classList.remove('active');
+        function sendOrder() {
+            if (cart.length === 0) return;
+            // Отправляем данные боту
+            tg.sendData(JSON.stringify(cart));
+            tg.close(); // Закрываем приложение после заказа
         }
 
-        function openProfile() { document.getElementById('profile-screen').classList.add('active'); }
-        function closeProfile() { document.getElementById('profile-screen').classList.remove('active'); }
+        function closeCart() { document.getElementById('cart-screen').classList.remove('active'); }
+        function closeModal() { document.getElementById('overlay').style.display = 'none'; document.getElementById('modal').classList.remove('active'); }
 
-        // Юзер из ТГ
-        if(tg.initDataUnsafe?.user) {
-            const u = tg.initDataUnsafe.user;
-            document.getElementById('user-name').innerText = u.first_name;
-            document.getElementById('avatar').innerText = u.first_name[0].toUpperCase();
-        }
-
-        fetchProducts();
+        load();
     </script>
 </body>
 </html>
