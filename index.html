@@ -10,145 +10,161 @@
         :root { --bg: #08090a; --card: #121316; --accent: #007aff; --text: #ffffff; --muted: #8e8e93; --glass: rgba(255, 255, 255, 0.05); }
         body { background: var(--bg); color: var(--text); font-family: 'Manrope', sans-serif; margin: 0; padding: 20px; padding-bottom: 120px; overflow-x: hidden; }
         
-        /* Сетка товаров */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .user-chip { background: var(--glass); padding: 8px 15px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 8px; font-size: 14px; }
+        .avatar { width: 24px; height: 24px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; }
+
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .card { background: var(--card); border-radius: 24px; padding: 12px; border: 1px solid var(--glass); }
+        .card { background: var(--card); border-radius: 24px; padding: 12px; border: 1px solid var(--glass); transition: 0.2s; position: relative; }
+        .card:active { transform: scale(0.96); }
         .card img { width: 100%; aspect-ratio: 1; border-radius: 18px; object-fit: cover; }
-        .price { font-weight: 800; color: var(--accent); margin-top: 5px; }
+        .price { font-weight: 800; color: var(--accent); font-size: 17px; margin-top: 5px; }
 
-        /* Плавающая корзина */
-        .cart-bar { position: fixed; bottom: 30px; left: 20px; right: 20px; background: var(--accent); padding: 20px; border-radius: 20px; display: none; justify-content: space-between; font-weight: 800; z-index: 900; box-shadow: 0 10px 30px rgba(0,122,255,0.3); }
+        .heart { position: absolute; top: 18px; right: 18px; font-size: 20px; color: rgba(255,255,255,0.2); }
+        .heart.active { color: #ff3b30; }
 
-        /* Экран КОРЗИНЫ */
-        .screen { position: fixed; top: 0; left: 100%; width: 100%; height: 100%; background: var(--bg); z-index: 2000; transition: 0.3s; padding: 25px; box-sizing: border-box; overflow-y: auto; }
+        .cart-bar { position: fixed; bottom: 30px; left: 20px; right: 20px; background: var(--accent); padding: 20px; border-radius: 22px; display: none; justify-content: space-between; font-weight: 800; z-index: 1000; box-shadow: 0 10px 40px rgba(0,122,255,0.3); }
+
+        .screen { position: fixed; top: 0; left: 100%; width: 100%; height: 100%; background: var(--bg); z-index: 2000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); padding: 25px; box-sizing: border-box; overflow-y: auto; }
         .screen.active { left: 0; }
-        .cart-item { background: var(--card); padding: 15px; border-radius: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--glass); }
-        
-        /* Модалка выбора вкуса */
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; z-index: 1000; }
-        .modal { position: fixed; bottom: -100%; left: 0; width: 100%; background: #18181b; border-radius: 30px 30px 0 0; padding: 30px; box-sizing: border-box; transition: 0.4s ease; z-index: 1001; }
-        .modal.active { bottom: 0; }
-        .flavor-item { background: var(--glass); padding: 15px; border-radius: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; }
-        .flavor-item.selected { border: 1px solid var(--accent); background: rgba(0,122,255,0.1); }
+        .cart-item { background: var(--card); padding: 15px; border-radius: 18px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--glass); }
 
-        .btn-pay { background: var(--accent); color: white; border: none; width: 100%; padding: 20px; border-radius: 20px; font-weight: 800; font-size: 16px; margin-top: 20px; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; z-index: 3000; }
+        .modal { position: fixed; bottom: -100%; left: 0; width: 100%; background: #161618; border-radius: 35px 35px 0 0; padding: 35px; box-sizing: border-box; transition: 0.4s ease; z-index: 3001; }
+        .modal.active { bottom: 0; }
+        .flavor-btn { background: var(--glass); padding: 16px; border-radius: 16px; margin-bottom: 10px; display: flex; justify-content: space-between; border: 1px solid transparent; }
+        .flavor-btn.active { border-color: var(--accent); background: rgba(0,122,255,0.15); }
+
+        .main-btn { background: var(--accent); color: white; border: none; width: 100%; padding: 20px; border-radius: 20px; font-weight: 800; font-size: 16px; margin-top: 25px; }
     </style>
 </head>
 <body>
 
-    <!-- Главная -->
-    <div id="home-view">
-        <h1 style="font-weight: 800;">Bermuda</h1>
-        <div class="grid" id="product-grid"></div>
+    <div id="home">
+        <div class="header">
+            <h1 style="font-weight: 800; margin: 0; letter-spacing: -1px;">Bermuda</h1>
+            <div class="user-chip" onclick="openProfile()">
+                <div class="avatar" id="ava">K</div>
+                <span id="name">Костя</span>
+            </div>
+        </div>
+        <div class="grid" id="products"></div>
     </div>
 
-    <!-- Корзина -->
-    <div class="screen" id="cart-screen">
-        <div onclick="closeCart()" style="color: var(--accent); font-weight: 800; margin-bottom: 30px;">❮ НАЗАД</div>
-        <h2 style="font-size: 28px; margin-bottom: 20px;">Моя корзина</h2>
-        <div id="cart-items-list"></div>
-        <div id="cart-total-info" style="margin-top: 20px; font-size: 20px; font-weight: 800; text-align: right;"></div>
-        <button class="btn-pay" onclick="sendOrder()">ОФОРМИТЬ И ОПЛАТИТЬ</button>
+    <div class="screen" id="cart-scr">
+        <div onclick="closeCart()" style="color: var(--accent); font-weight: 800; margin-bottom: 30px; font-size: 14px;">❮ МАГАЗИН</div>
+        <h2 style="font-size: 32px; font-weight: 800; margin-bottom: 25px;">Корзина</h2>
+        <div id="cart-list"></div>
+        <div id="total-text" style="text-align: right; font-size: 22px; font-weight: 800; margin-top: 25px; color: var(--accent);"></div>
+        <button class="main-btn" onclick="sendOrder()">ОФОРМИТЬ И ОПЛАТИТЬ</button>
     </div>
 
-    <div class="cart-bar" id="cart-bar" onclick="openCart()">
-        <span>КОРЗИНА: <span id="bar-count">0</span></span>
-        <span id="bar-total">0 ₽ ❯</span>
+    <div class="screen" id="prof-scr">
+        <div onclick="closeProfile()" style="color: var(--accent); font-weight: 800; margin-bottom: 30px;">❮ НАЗАД</div>
+        <h2 style="font-size: 32px; font-weight: 800;">Профиль</h2>
+        <div class="cart-item" style="padding: 25px;">📦 Заказы <span style="font-weight: 800;">0</span></div>
+        <div class="cart-item" style="padding: 25px;">⭐ Избранное <span style="font-weight: 800;" id="fav-count">0</span></div>
     </div>
 
-    <!-- Модалка вкуса -->
-    <div class="overlay" id="overlay" onclick="closeModal()"></div>
+    <div class="cart-bar" id="bar" onclick="openCart()">
+        <span>КОРЗИНА: <span id="b-cnt">0</span></span>
+        <span id="b-tot">0 ₽ ❯</span>
+    </div>
+
+    <div class="modal-overlay" id="overlay" onclick="closeModal()"></div>
     <div class="modal" id="modal">
-        <h2 id="m-name">Вкус</h2>
+        <h2 id="m-name" style="margin-top: 0; font-size: 24px;">Вкус</h2>
         <div id="m-flavors"></div>
-        <button class="btn-pay" onclick="confirmAdd()">ДОБАВИТЬ В КОРЗИНУ</button>
+        <button class="main-btn" onclick="confirmAdd()">В КОРЗИНУ</button>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
+        tg.expand();
+        
         let products = [];
         let cart = [];
-        let selectedProduct = null;
+        let favs = JSON.parse(localStorage.getItem('f')) || [];
+        let cur = null;
 
-        // Загрузка товаров
+        // ВАЖНО: При тестировании на телефоне замени localhost на адрес из ngrok!
+        const API = 'http://localhost:8080/api/products';
+
         async function load() {
             try {
-                const res = await fetch('http://localhost:8080/api/products');
-                products = await res.json();
+                const r = await fetch(API);
+                products = await r.json();
             } catch(e) {
-                products = [{id:1, name:"ANARCHY V2", price:450, img:"https://via.placeholder.com/300", flavors:["Манго","Ананас"]}];
+                products = [{id:1, name:"DEMO ANARCHY", price:450, img:"https://via.placeholder.com/300/111/fff", flavors:["Манго","Лед"]}];
             }
             render();
         }
 
         function render() {
-            const grid = document.getElementById('product-grid');
-            grid.innerHTML = products.map(p => `
-                <div class="card" onclick="openModal(${p.id})">
+            document.getElementById('products').innerHTML = products.map(p => `
+                <div class="card" onclick="openProduct(${p.id})">
+                    <span class="heart ${favs.includes(p.id)?'active':''}" onclick="toggleFav(event, ${p.id})">❤</span>
                     <img src="${p.img}">
-                    <div style="font-weight: 600; margin-top: 10px;">${p.name}</div>
+                    <div style="font-weight: 600; margin-top: 10px; font-size: 15px;">${p.name}</div>
                     <div class="price">${p.price} ₽</div>
                 </div>
             `).join('');
+            document.getElementById('fav-count').innerText = favs.length;
         }
 
-        function openModal(id) {
-            selectedProduct = products.find(p => p.id === id);
-            document.getElementById('m-name').innerText = selectedProduct.name;
-            document.getElementById('m-flavors').innerHTML = selectedProduct.flavors.map((f, i) => `
-                <div class="flavor-item ${i===0?'selected':''}" onclick="selectFlavor(this)"><span>${f}</span></div>
+        function openProduct(id) {
+            cur = products.find(p => p.id === id);
+            document.getElementById('m-name').innerText = cur.name;
+            document.getElementById('m-flavors').innerHTML = cur.flavors.map((f, i) => `
+                <div class="flavor-btn ${i===0?'active':''}" onclick="selF(this)"><span>${f}</span><span>✓</span></div>
             `).join('');
             document.getElementById('overlay').style.display = 'block';
             document.getElementById('modal').classList.add('active');
         }
 
-        function selectFlavor(el) {
-            document.querySelectorAll('.flavor-item').forEach(i => i.classList.remove('selected'));
-            el.classList.add('selected');
-        }
+        function selF(el) { document.querySelectorAll('.flavor-btn').forEach(b => b.classList.remove('active')); el.classList.add('active'); tg.HapticFeedback.selectionChanged(); }
 
         function confirmAdd() {
-            const flavor = document.querySelector('.flavor-item.selected span').innerText;
-            cart.push({ name: selectedProduct.name, price: selectedProduct.price, flavor: flavor });
-            updateBar();
-            closeModal();
-            tg.HapticFeedback.impactOccurred('medium');
+            const f = document.querySelector('.flavor-btn.active span').innerText;
+            cart.push({ name: cur.name, price: cur.price, flavor: f });
+            updateBar(); closeModal(); tg.HapticFeedback.notificationOccurred('success');
         }
 
         function updateBar() {
-            const bar = document.getElementById('cart-bar');
-            bar.style.display = cart.length ? 'flex' : 'none';
-            document.getElementById('bar-count').innerText = cart.length;
+            const b = document.getElementById('bar');
+            b.style.display = cart.length ? 'flex' : 'none';
+            document.getElementById('b-cnt').innerText = cart.length;
             const total = cart.reduce((s, i) => s + i.price, 0);
-            document.getElementById('bar-total').innerText = total + ' ₽ ❯';
+            document.getElementById('b-tot').innerText = total + ' ₽ ❯';
         }
 
         function openCart() {
-            const list = document.getElementById('cart-items-list');
-            list.innerHTML = cart.map((item, idx) => `
+            document.getElementById('cart-list').innerHTML = cart.map(i => `
                 <div class="cart-item">
-                    <div>
-                        <div style="font-weight: 800;">${item.name}</div>
-                        <div style="color: var(--muted); font-size: 13px;">Вкус: ${item.flavor}</div>
-                    </div>
-                    <div style="font-weight: 800;">${item.price} ₽</div>
+                    <div><div style="font-weight: 800;">${i.name}</div><div style="color:var(--muted); font-size:12px;">${i.flavor}</div></div>
+                    <div style="font-weight: 800;">${i.price} ₽</div>
                 </div>
             `).join('');
-            const total = cart.reduce((s, i) => s + i.price, 0);
-            document.getElementById('cart-total-info').innerText = 'Итого: ' + total + ' ₽';
-            document.getElementById('cart-screen').classList.add('active');
+            document.getElementById('total-text').innerText = 'Итого: ' + cart.reduce((s, i) => s + i.price, 0) + ' ₽';
+            document.getElementById('cart-scr').classList.add('active');
         }
 
         function sendOrder() {
-            if (cart.length === 0) return;
-            // Отправляем данные боту
+            if(!cart.length) return;
             tg.sendData(JSON.stringify(cart));
-            tg.close(); // Закрываем приложение после заказа
         }
 
-        function closeCart() { document.getElementById('cart-screen').classList.remove('active'); }
+        function toggleFav(e, id) { e.stopPropagation(); if(favs.includes(id)) favs = favs.filter(i => i !== id); else favs.push(id); localStorage.setItem('f', JSON.stringify(favs)); render(); tg.HapticFeedback.impactOccurred('light'); }
         function closeModal() { document.getElementById('overlay').style.display = 'none'; document.getElementById('modal').classList.remove('active'); }
+        function openProfile() { document.getElementById('prof-scr').classList.add('active'); }
+        function closeProfile() { document.getElementById('prof-scr').classList.remove('active'); }
+        function closeCart() { document.getElementById('cart-scr').classList.remove('active'); }
 
+        if(tg.initDataUnsafe?.user) {
+            const u = tg.initDataUnsafe.user;
+            document.getElementById('name').innerText = u.first_name;
+            document.getElementById('ava').innerText = u.first_name[0].toUpperCase();
+        }
         load();
     </script>
 </body>
