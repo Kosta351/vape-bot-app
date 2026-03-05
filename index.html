@@ -11,136 +11,230 @@
             --card-bg: #1c1d21;
             --text-main: #ffffff;
             --text-gray: #9ca3af;
-            --accent: #8e44ad;
+            --accent: #8e44ad; /* Фиолетовый как на скринах */
         }
 
         body {
             background-color: var(--bg-color);
             color: var(--text-main);
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            margin: 0; padding: 16px; -webkit-user-select: none;
+            margin: 0; padding: 15px; -webkit-user-select: none;
+            overflow-x: hidden;
         }
 
-        /* Поиск */
+        /* Шапка и поиск */
         .search-container {
             background: var(--card-bg);
-            border-radius: 12px; padding: 12px 15px; margin-bottom: 20px;
+            border-radius: 12px; padding: 12px; margin-bottom: 15px;
         }
         .search-container input {
-            background: transparent; border: none; color: white; outline: none; width: 100%; font-size: 16px;
+            background: transparent; border: none; color: white; width: 100%; outline: none;
         }
 
-        /* Профиль */
-        .profile-card {
+        /* Профиль мини-карта */
+        .profile-mini {
             background: var(--card-bg); border-radius: 15px; padding: 12px;
             display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;
+            cursor: pointer;
         }
-        .profile-info { display: flex; align-items: center; gap: 12px; }
-        .profile-avatar { width: 40px; height: 40px; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; }
-
-        /* Баннер как в оригинале */
-        .banner {
-            background: linear-gradient(90deg, #000 0%, #1a1a1a 100%);
-            border-radius: 15px; padding: 20px; margin-bottom: 25px;
-            display: flex; justify-content: space-between; align-items: center;
-            border: 1px solid #333;
-        }
-        .banner-text h2 { margin: 0; font-size: 18px; }
-        .banner-text p { margin: 5px 0 0; font-size: 12px; color: var(--text-gray); }
-
-        /* Категории */
-        .categories { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; }
-        .cat-pill { background: #2d2d2d; padding: 8px 16px; border-radius: 20px; font-size: 14px; white-space: nowrap; }
-        .cat-pill.active { background: var(--accent); color: white; }
+        .profile-info { display: flex; align-items: center; gap: 10px; }
+        .avatar { width: 35px; height: 35px; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; }
 
         /* Сетка товаров */
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .card { background: var(--card-bg); border-radius: 15px; padding: 10px; position: relative; }
         .card img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 10px; }
-        .card h3 { font-size: 13px; margin: 8px 0 4px; font-weight: 500; }
-        .card .price { font-weight: bold; margin-bottom: 8px; }
+        .card h3 { font-size: 14px; margin: 8px 0 4px; }
+        .card .price { font-weight: bold; color: var(--accent); }
         
-        .add-btn {
-            background: #fff; color: #000; border: none; width: 100%; padding: 10px;
-            border-radius: 10px; font-weight: bold; font-size: 12px;
+        .heart-btn {
+            position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.3);
+            border: none; border-radius: 50%; width: 30px; height: 30px; color: white; font-size: 18px;
         }
+        .heart-btn.active { color: #ff4757; }
+
+        /* МОДАЛЬНОЕ ОКНО (Выбор вкуса) */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); display: none; z-index: 100;
+        }
+        .modal {
+            position: fixed; bottom: -100%; left: 0; width: 100%;
+            background: #18191d; border-radius: 25px 25px 0 0;
+            padding: 20px; transition: 0.3s; z-index: 101;
+            box-sizing: border-box; max-height: 80vh; overflow-y: auto;
+        }
+        .modal.active { bottom: 0; }
+        .modal h2 { margin-top: 0; font-size: 20px; }
+        
+        .flavor-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 0; border-bottom: 1px solid #2d2d2d;
+        }
+        .flavor-item label { display: flex; align-items: center; gap: 10px; width: 100%; cursor: pointer; }
+        
+        .add-to-cart-btn {
+            background: var(--accent); color: white; border: none; width: 100%;
+            padding: 15px; border-radius: 15px; font-weight: bold; margin-top: 20px;
+        }
+
+        /* ЭКРАН ПРОФИЛЯ */
+        #profile-screen {
+            position: fixed; top: 0; left: 100%; width: 100%; height: 100%;
+            background: var(--bg-color); z-index: 200; transition: 0.3s; padding: 20px; box-sizing: border-box;
+        }
+        #profile-screen.active { left: 0; }
+        .profile-btn {
+            background: var(--card-bg); padding: 20px; border-radius: 15px;
+            margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;
+        }
+        .back-btn { background: none; border: none; color: var(--accent); font-size: 16px; margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
-    <div class="search-container">
-        <input type="text" placeholder="Поиск">
-    </div>
-
-    <div class="profile-card">
-        <div class="profile-info">
-            <div class="profile-avatar">IMG</div>
-            <div class="profile-name" id="user-name">Загрузка...</div>
+    <!-- Главный экран -->
+    <div id="main-screen">
+        <div class="search-container">
+            <input type="text" placeholder="Поиск">
         </div>
-        <span>❯</span>
-    </div>
 
-    <!-- Тот самый баннер -->
-    <div class="banner">
-        <div class="banner-text">
-            <h2>Возвращение легенды</h2>
-            <p>Waka soPRO 10000 по<br>самой низкой цене</p>
+        <div class="profile-mini" onclick="openProfile()">
+            <div class="profile-info">
+                <div class="avatar">IMG</div>
+                <div class="profile-name" id="user-name">Костя</div>
+            </div>
+            <span>В профиль ❯</span>
         </div>
-        <div style="font-size: 40px;">💨</div>
+
+        <h2 style="font-size: 18px; margin-bottom: 15px;">Жижки</h2>
+        <div class="grid" id="product-list"></div>
     </div>
 
-    <div class="categories">
-        <div class="cat-pill active">Жижки</div>
-        <div class="cat-pill">Одноразки</div>
-        <div class="cat-pill">POD-системы</div>
+    <!-- Экран Профиля (как на твоем скрине) -->
+    <div id="profile-screen">
+        <button class="back-btn" onclick="closeProfile()">❮ Назад</button>
+        <div class="profile-mini" style="margin-bottom: 30px;">
+            <div class="profile-info">
+                <div class="avatar" style="width: 50px; height: 50px;">IMG</div>
+                <div class="profile-name" style="font-size: 20px;" id="prof-name">Костя</div>
+            </div>
+        </div>
+
+        <div class="profile-btn">
+            <span>📋 Мои заказы</span>
+            <span>❯</span>
+        </div>
+        <div class="profile-btn">
+            <span>❤️ Избранное</span>
+            <span>❯</span>
+        </div>
     </div>
 
-    <h2 style="font-size: 18px; margin-bottom: 15px;">Скидки / Жижки</h2>
-    <div class="grid" id="product-list">
-        <!-- Товары добавятся сюда через JavaScript -->
+    <!-- Модалка выбора вкуса -->
+    <div class="modal-overlay" id="overlay" onclick="closeModal()"></div>
+    <div class="modal" id="flavor-modal">
+        <div style="width: 40px; height: 4px; background: #333; margin: 0 auto 15px; border-radius: 2px;"></div>
+        <h2 id="modal-title">Вкус</h2>
+        <div id="flavor-list">
+            <!-- Сюда добавятся вкусы -->
+        </div>
+        <button class="add-to-cart-btn" onclick="addToCart()">Добавить в корзину</button>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // 1. Устанавливаем имя пользователя из Telegram
-        const userNameField = document.getElementById('user-name');
-        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            userNameField.innerText = tg.initDataUnsafe.user.first_name;
-        } else {
-            userNameField.innerText = "Гость";
-        }
-
-        // 2. Список твоих "жижек" (удобно добавлять новые здесь)
+        // Данные (только жижки)
         const products = [
-            { id: 1, name: "Husky Double Ice", price: 550, img: "https://via.placeholder.com/200/222/fff?text=Husky" },
-            { id: 2, name: "Maxwell's Shoria", price: 600, img: "https://via.placeholder.com/200/222/fff?text=Maxwells" },
-            { id: 3, name: "Boshki Original", price: 500, img: "https://via.placeholder.com/200/222/fff?text=Boshki" },
-            { id: 4, name: "Rick and Morty", price: 450, img: "https://via.placeholder.com/200/222/fff?text=R&M" },
+            { 
+                id: 1, name: "АНАРХИЯ V2", price: 450, 
+                img: "https://via.placeholder.com/200/222/fff?text=Anarchy",
+                flavors: ["Манго пиноколада", "Персик ананас", "Личи маракуйя", "Кокос дыня"]
+            },
+            { 
+                id: 2, name: "Husky Double Ice", price: 550, 
+                img: "https://via.placeholder.com/200/222/fff?text=Husky",
+                flavors: ["Ледяной арбуз", "Йогурт", "Дикие ягоды"]
+            }
         ];
 
-        // 3. Функция для вывода товаров на экран
-        const productList = document.getElementById('product-list');
+        let favorites = JSON.parse(localStorage.getItem('favs')) || [];
+        let currentProduct = null;
 
         function renderProducts() {
-            products.forEach(product => {
+            const list = document.getElementById('product-list');
+            list.innerHTML = '';
+            products.forEach(p => {
+                const isFav = favorites.includes(p.id) ? 'active' : '';
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.innerHTML = `
-                    <img src="${product.img}" alt="${product.name}">
-                    <h3>${product.name}</h3>
-                    <div class="price">${product.price} ₽</div>
-                    <button class="add-btn" onclick="addToCart(${product.id})">В корзину</button>
+                    <button class="heart-btn ${isFav}" onclick="toggleFav(event, ${p.id})">❤</button>
+                    <img src="${p.img}" onclick="openModal(${p.id})">
+                    <h3 onclick="openModal(${p.id})">${p.name}</h3>
+                    <div class="price" onclick="openModal(${p.id})">${p.price} ₽</div>
                 `;
-                productList.appendChild(card);
+                list.appendChild(card);
             });
         }
 
-        function addToCart(id) {
-            tg.HapticFeedback.impactOccurred('medium'); // Вибрация при нажатии
-            tg.MainButton.setText("ПЕРЕЙТИ К ОПЛАТЕ");
-            tg.MainButton.show();
+        // Избранное
+        function toggleFav(e, id) {
+            e.stopPropagation();
+            if (favorites.includes(id)) {
+                favorites = favorites.filter(fid => fid !== id);
+            } else {
+                favorites.push(id);
+                tg.HapticFeedback.notificationOccurred('success');
+            }
+            localStorage.setItem('favs', JSON.stringify(favorites));
+            renderProducts();
+        }
+
+        // Модалка вкусов
+        function openModal(id) {
+            currentProduct = products.find(p => p.id === id);
+            document.getElementById('modal-title').innerText = currentProduct.name;
+            const fList = document.getElementById('flavor-list');
+            fList.innerHTML = '';
+            
+            currentProduct.flavors.forEach((f, index) => {
+                fList.innerHTML += `
+                    <div class="flavor-item">
+                        <label>
+                            <input type="radio" name="flavor" value="${f}" ${index===0?'checked':''}>
+                            <span>${f}</span>
+                        </label>
+                        <span style="color:var(--text-gray)">+0 ₽</span>
+                    </div>
+                `;
+            });
+
+            document.getElementById('overlay').style.display = 'block';
+            document.getElementById('flavor-modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('flavor-modal').classList.remove('active');
+        }
+
+        function addToCart() {
+            const selectedFlavor = document.querySelector('input[name="flavor"]:checked').value;
+            tg.showPopup({ message: `Добавлено: ${currentProduct.name} (${selectedFlavor})` });
+            closeModal();
+        }
+
+        // Профиль
+        function openProfile() { document.getElementById('profile-screen').classList.add('active'); }
+        function closeProfile() { document.getElementById('profile-screen').classList.remove('active'); }
+
+        // Имя из ТГ
+        if(tg.initDataUnsafe?.user) {
+            document.getElementById('user-name').innerText = tg.initDataUnsafe.user.first_name;
+            document.getElementById('prof-name').innerText = tg.initDataUnsafe.user.first_name;
         }
 
         renderProducts();
