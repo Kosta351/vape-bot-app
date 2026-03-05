@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bermuda Shop</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg-color: #0f1012;
+            --card-bg: #1c1d21;
+            --text-main: #ffffff;
+            --text-gray: #9ca3af;
+            --accent: #8e44ad;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0; padding: 16px; -webkit-user-select: none;
+        }
+
+        /* Поиск */
+        .search-container {
+            background: var(--card-bg);
+            border-radius: 12px; padding: 12px 15px; margin-bottom: 20px;
+        }
+        .search-container input {
+            background: transparent; border: none; color: white; outline: none; width: 100%; font-size: 16px;
+        }
+
+        /* Профиль */
+        .profile-card {
+            background: var(--card-bg); border-radius: 15px; padding: 12px;
+            display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;
+        }
+        .profile-info { display: flex; align-items: center; gap: 12px; }
+        .profile-avatar { width: 40px; height: 40px; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; }
+
+        /* Баннер как в оригинале */
+        .banner {
+            background: linear-gradient(90deg, #000 0%, #1a1a1a 100%);
+            border-radius: 15px; padding: 20px; margin-bottom: 25px;
+            display: flex; justify-content: space-between; align-items: center;
+            border: 1px solid #333;
+        }
+        .banner-text h2 { margin: 0; font-size: 18px; }
+        .banner-text p { margin: 5px 0 0; font-size: 12px; color: var(--text-gray); }
+
+        /* Категории */
+        .categories { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; }
+        .cat-pill { background: #2d2d2d; padding: 8px 16px; border-radius: 20px; font-size: 14px; white-space: nowrap; }
+        .cat-pill.active { background: var(--accent); color: white; }
+
+        /* Сетка товаров */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .card { background: var(--card-bg); border-radius: 15px; padding: 10px; position: relative; }
+        .card img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 10px; }
+        .card h3 { font-size: 13px; margin: 8px 0 4px; font-weight: 500; }
+        .card .price { font-weight: bold; margin-bottom: 8px; }
+        
+        .add-btn {
+            background: #fff; color: #000; border: none; width: 100%; padding: 10px;
+            border-radius: 10px; font-weight: bold; font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="search-container">
+        <input type="text" placeholder="Поиск">
+    </div>
+
+    <div class="profile-card">
+        <div class="profile-info">
+            <div class="profile-avatar">IMG</div>
+            <div class="profile-name" id="user-name">Загрузка...</div>
+        </div>
+        <span>❯</span>
+    </div>
+
+    <!-- Тот самый баннер -->
+    <div class="banner">
+        <div class="banner-text">
+            <h2>Возвращение легенды</h2>
+            <p>Waka soPRO 10000 по<br>самой низкой цене</p>
+        </div>
+        <div style="font-size: 40px;">💨</div>
+    </div>
+
+    <div class="categories">
+        <div class="cat-pill active">Жижки</div>
+        <div class="cat-pill">Одноразки</div>
+        <div class="cat-pill">POD-системы</div>
+    </div>
+
+    <h2 style="font-size: 18px; margin-bottom: 15px;">Скидки / Жижки</h2>
+    <div class="grid" id="product-list">
+        <!-- Товары добавятся сюда через JavaScript -->
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        // 1. Устанавливаем имя пользователя из Telegram
+        const userNameField = document.getElementById('user-name');
+        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+            userNameField.innerText = tg.initDataUnsafe.user.first_name;
+        } else {
+            userNameField.innerText = "Гость";
+        }
+
+        // 2. Список твоих "жижек" (удобно добавлять новые здесь)
+        const products = [
+            { id: 1, name: "Husky Double Ice", price: 550, img: "https://via.placeholder.com/200/222/fff?text=Husky" },
+            { id: 2, name: "Maxwell's Shoria", price: 600, img: "https://via.placeholder.com/200/222/fff?text=Maxwells" },
+            { id: 3, name: "Boshki Original", price: 500, img: "https://via.placeholder.com/200/222/fff?text=Boshki" },
+            { id: 4, name: "Rick and Morty", price: 450, img: "https://via.placeholder.com/200/222/fff?text=R&M" },
+        ];
+
+        // 3. Функция для вывода товаров на экран
+        const productList = document.getElementById('product-list');
+
+        function renderProducts() {
+            products.forEach(product => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <img src="${product.img}" alt="${product.name}">
+                    <h3>${product.name}</h3>
+                    <div class="price">${product.price} ₽</div>
+                    <button class="add-btn" onclick="addToCart(${product.id})">В корзину</button>
+                `;
+                productList.appendChild(card);
+            });
+        }
+
+        function addToCart(id) {
+            tg.HapticFeedback.impactOccurred('medium'); // Вибрация при нажатии
+            tg.MainButton.setText("ПЕРЕЙТИ К ОПЛАТЕ");
+            tg.MainButton.show();
+        }
+
+        renderProducts();
+    </script>
+</body>
+</html>
