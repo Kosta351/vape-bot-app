@@ -3,271 +3,224 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Vape Custom Shop</title>
+    <title>Bermuda Premium</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        /* НАСТРОЙКА ТВОИХ ЦВЕТОВ */
         :root {
-            --bg: #0a0b0d;
-            --glass: rgba(255, 255, 255, 0.03);
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --accent: #3b82f6; /* Твой новый фирменный синий */
-            --accent-gradient: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            --bg: #08090a;
+            --card: #121316;
+            --accent: #007aff;
             --text: #ffffff;
-            --text-muted: #64748b;
+            --muted: #8e8e93;
+            --glass: rgba(255, 255, 255, 0.05);
         }
 
         body {
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: 'Inter', -apple-system, sans-serif;
-            margin: 0; padding: 20px;
-            -webkit-user-select: none;
-            line-height: 1.5;
+            background: var(--bg); color: var(--text);
+            font-family: 'Manrope', sans-serif; margin: 0; padding: 20px;
+            padding-bottom: 120px; -webkit-tap-highlight-color: transparent;
         }
 
-        /* Кастомный поиск */
-        .search-box {
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px; padding: 14px 20px;
-            margin-bottom: 25px; display: flex; align-items: center;
+        /* Профиль */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .profile-btn {
+            background: var(--glass); padding: 10px 18px; border-radius: 20px;
+            display: flex; align-items: center; gap: 10px; border: 1px solid rgba(255,255,255,0.1);
         }
-        .search-box input {
-            background: transparent; border: none; color: white; width: 100%; outline: none; font-size: 15px;
-        }
+        .avatar { width: 30px; height: 30px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; }
 
-        /* Виджет профиля в новом стиле */
-        .user-widget {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 15px; background: var(--glass);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px; margin-bottom: 30px;
-            backdrop-filter: blur(10px);
-        }
-        .user-info { display: flex; align-items: center; gap: 15px; }
-        .user-avatar { 
-            width: 45px; height: 45px; 
-            background: var(--accent-gradient);
-            border-radius: 14px; display: flex; align-items: center; justify-content: center;
-            font-weight: bold; font-size: 18px;
-        }
+        /* Поиск */
+        .search { background: var(--card); border-radius: 16px; padding: 14px; margin-bottom: 25px; border: 1px solid var(--glass); }
+        .search input { background: transparent; border: none; color: white; width: 100%; outline: none; }
 
-        /* Сетка товаров */
-        .section-title { font-size: 22px; font-weight: 800; margin-bottom: 20px; letter-spacing: -0.5px; }
+        /* Сетка */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .card { 
+            background: var(--card); border-radius: 24px; padding: 12px; 
+            border: 1px solid var(--glass); position: relative;
+        }
+        .card img { width: 100%; aspect-ratio: 1; border-radius: 18px; object-fit: cover; margin-bottom: 10px; }
+        .card h3 { font-size: 15px; margin: 0 0 8px; font-weight: 600; }
+        .price { font-weight: 800; color: var(--accent); font-size: 16px; }
         
-        .products-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        
-        .product-card {
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px; padding: 12px;
-            transition: transform 0.2s; position: relative;
-        }
-        .product-card:active { transform: scale(0.97); }
-        
-        .product-img {
-            width: 100%; aspect-ratio: 1; border-radius: 18px;
-            object-fit: cover; margin-bottom: 12px;
-        }
-        
-        .product-name { font-size: 15px; font-weight: 600; margin: 0 0 5px 0; }
-        .product-price { color: var(--accent); font-weight: 700; font-size: 16px; }
+        .fav-btn { position: absolute; top: 20px; right: 20px; font-size: 20px; color: rgba(255,255,255,0.2); }
+        .fav-btn.active { color: #ff3b30; }
 
-        .fav-icon {
-            position: absolute; top: 20px; right: 20px;
-            font-size: 20px; color: rgba(255,255,255,0.2); transition: 0.3s;
+        /* Модалка вкусов */
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; z-index: 1000; }
+        .modal { 
+            position: fixed; bottom: -100%; left: 0; width: 100%; 
+            background: #18181b; border-radius: 30px 30px 0 0; 
+            padding: 30px; box-sizing: border-box; transition: 0.4s ease; z-index: 1001; 
         }
-        .fav-icon.active { color: #ef4444; }
+        .modal.active { bottom: 0; }
+        .flavor-item { 
+            background: var(--glass); padding: 15px; border-radius: 15px; margin-bottom: 10px;
+            display: flex; justify-content: space-between; border: 1px solid transparent;
+        }
+        .flavor-item.selected { border-color: var(--accent); background: rgba(0,122,255,0.1); }
 
-        /* Модальное окно выбора вкуса */
-        .modal-sheet {
-            position: fixed; bottom: -100%; left: 0; width: 100%;
-            background: #111214; border-top: 1px solid var(--glass-border);
-            border-radius: 30px 30px 0 0; padding: 25px;
-            box-sizing: border-box; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 1000;
-        }
-        .modal-sheet.open { bottom: 0; }
-        
-        .flavor-option {
-            background: var(--glass); border-radius: 15px;
-            padding: 15px; margin-bottom: 10px;
-            display: flex; align-items: center; justify-content: space-between;
-            border: 1px solid transparent;
-        }
-        .flavor-option.selected { border-color: var(--accent); background: rgba(59, 130, 246, 0.1); }
-
-        .action-btn {
-            background: var(--accent-gradient); color: white; border: none;
-            width: 100%; padding: 18px; border-radius: 18px;
-            font-weight: 700; font-size: 16px; margin-top: 15px;
-            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.2);
+        .btn-main { 
+            background: var(--accent); color: white; border: none; width: 100%; 
+            padding: 20px; border-radius: 20px; font-weight: 800; font-size: 16px; margin-top: 20px;
         }
 
         /* Экран профиля */
-        .profile-page {
-            position: fixed; top: 0; left: 100%; width: 100%; height: 100vh;
+        .screen-profile {
+            position: fixed; top: 0; left: 100%; width: 100%; height: 100%;
             background: var(--bg); z-index: 2000; transition: 0.3s; padding: 25px; box-sizing: border-box;
         }
-        .profile-page.open { left: 0; }
+        .screen-profile.active { left: 0; }
 
-        .overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
-            display: none; z-index: 900;
+        /* Плавающая корзина */
+        .cart-bar {
+            position: fixed; bottom: 30px; left: 20px; right: 20px;
+            background: var(--accent); padding: 20px; border-radius: 20px;
+            display: none; justify-content: space-between; font-weight: 800; z-index: 900;
         }
     </style>
 </head>
 <body>
 
-    <!-- Главный экран -->
-    <div id="home">
-        <div class="search-box">
-            <input type="text" placeholder="Поиск по жижкам...">
-        </div>
-
-        <div class="user-widget" onclick="toggleProfile(true)">
-            <div class="user-info">
-                <div class="user-avatar" id="avatar-init">K</div>
-                <div>
-                    <div style="font-size: 14px; color: var(--text-muted);">Добро пожаловать</div>
-                    <div style="font-weight: bold;" id="user-name">Костя</div>
-                </div>
-            </div>
-            <div style="color: var(--accent); font-weight: 600;">Профиль ❯</div>
-        </div>
-
-        <h2 class="section-title">Ассортимент жижек</h2>
-        <div class="products-grid" id="grid"></div>
-    </div>
-
-    <!-- Твой новый экран профиля -->
-    <div class="profile-page" id="profile">
-        <div onclick="toggleProfile(false)" style="color: var(--accent); margin-bottom: 30px; font-weight: 600;">❮ Вернуться в магазин</div>
-        <h1 class="section-title" style="font-size: 28px;">Мой профиль</h1>
-        
-        <div class="user-widget" style="margin-bottom: 40px;">
-            <div class="user-info">
-                <div class="user-avatar" id="prof-init">K</div>
-                <div style="font-size: 18px; font-weight: 700;" id="prof-name">Костя</div>
+    <div id="main-view">
+        <div class="header">
+            <h1 style="margin: 0; font-size: 24px; font-weight: 800;">Bermuda Shop</h1>
+            <div class="profile-btn" onclick="openProfile()">
+                <div class="avatar" id="avatar">K</div>
+                <span id="user-name">Костя</span>
             </div>
         </div>
 
-        <div class="flavor-option" style="padding: 20px;">
-            <span>📦 Мои заказы</span>
-            <span style="color: var(--text-muted);">0 шт.</span>
-        </div>
-        <div class="flavor-option" style="padding: 20px;">
-            <span>⭐ Избранные вкусы</span>
-            <span style="color: var(--accent);">Перейти</span>
+        <div class="search"><input type="text" placeholder="Поиск жижек..."></div>
+
+        <h2 style="font-size: 18px; margin-bottom: 15px;">Только Жижки</h2>
+        <div class="grid" id="grid">
+            <p style="color: var(--muted)">Загрузка ассортимента...</p>
         </div>
     </div>
 
-    <!-- Лист выбора вкуса -->
+    <!-- Профиль -->
+    <div class="screen-profile" id="profile-screen">
+        <div onclick="closeProfile()" style="color: var(--accent); font-weight: 800; margin-bottom: 30px;">❮ МАГАЗИН</div>
+        <h2>Мой кабинет</h2>
+        <div class="flavor-item" style="padding: 25px;">📋 Мои заказы <span>0</span></div>
+        <div class="flavor-item" style="padding: 25px;">❤️ Избранное <span>0</span></div>
+    </div>
+
+    <!-- Корзина -->
+    <div class="cart-bar" id="cart-bar">
+        <span>В КОРЗИНЕ: <span id="cart-count">0</span> ШТ.</span>
+        <span id="cart-total">0 ₽ ❯</span>
+    </div>
+
+    <!-- Модалка -->
     <div class="overlay" id="overlay" onclick="closeModal()"></div>
-    <div class="modal-sheet" id="modal">
-        <div style="width: 50px; height: 5px; background: #333; margin: 0 auto 20px; border-radius: 10px;"></div>
-        <h2 id="m-title" style="margin-bottom: 20px;">Выберите вкус</h2>
-        <div id="flavors-container"></div>
-        <button class="action-btn" onclick="confirmSelection()">Добавить в корзину</button>
+    <div class="modal" id="modal">
+        <div style="width: 40px; height: 4px; background: #333; margin: 0 auto 20px; border-radius: 2px;"></div>
+        <h2 id="m-name">Выбор вкуса</h2>
+        <div id="m-flavors"></div>
+        <button class="btn-main" onclick="confirmAdd()">Добавить в корзину</button>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        tg.ready();
 
-        // Данные товаров
-        const data = [
-            { id: 101, name: "ANARCHY V2", price: 450, img: "https://via.placeholder.com/300/111/fff?text=ANARCHY", flavors: ["Манго-Личи", "Ананас", "Ежевика", "Вишня"] },
-            { id: 102, name: "HUSKY DOUBLE", price: 550, img: "https://via.placeholder.com/300/111/fff?text=HUSKY", flavors: ["Арбуз-Лед", "Дыня", "Мятная ягода"] },
-            { id: 103, name: "BOSHKI", price: 500, img: "https://via.placeholder.com/300/111/fff?text=BOSHKI", flavors: ["Хвоя-Ягоды", "Садовые", "Зимние"] },
-            { id: 104, name: "MAXWELLS", price: 620, img: "https://via.placeholder.com/300/111/fff?text=MAXWELLS", flavors: ["Shoria", "Pink", "Rich"] },
-        ];
+        let products = [];
+        let cart = [];
+        let selectedProduct = null;
+        let favs = JSON.parse(localStorage.getItem('favs')) || [];
 
-        let favs = JSON.parse(localStorage.getItem('my_favs')) || [];
-        let selectedItem = null;
+        // ССЫЛКА НА ТВОЙ API (замени на ngrok если тестишь локально)
+        const API_URL = 'http://localhost:8080/api/products';
 
-        function init() {
-            const grid = document.getElementById('grid');
-            grid.innerHTML = '';
-            
-            data.forEach(item => {
-                const isFav = favs.includes(item.id) ? 'active' : '';
-                grid.innerHTML += `
-                    <div class="product-card">
-                        <span class="fav-icon ${isFav}" onclick="toggleFav(event, ${item.id})">❤</span>
-                        <img src="${item.img}" class="product-img" onclick="openProduct(${item.id})">
-                        <div class="product-name" onclick="openProduct(${item.id})">${item.name}</div>
-                        <div class="product-price" onclick="openProduct(${item.id})">${item.price} ₽</div>
-                    </div>
-                `;
-            });
-
-            // Имя из Телеграм
-            if(tg.initDataUnsafe?.user) {
-                const name = tg.initDataUnsafe.user.first_name;
-                document.getElementById('user-name').innerText = name;
-                document.getElementById('prof-name').innerText = name;
-                document.getElementById('avatar-init').innerText = name[0];
-                document.getElementById('prof-init').innerText = name[0];
+        async function fetchProducts() {
+            try {
+                const res = await fetch(API_URL);
+                products = await res.json();
+                render();
+            } catch (e) {
+                // Если сервер не запущен, покажем демо
+                products = [{id:1, name:"DEMO ANARCHY", price:450, img:"https://via.placeholder.com/300", flavors:["Яблоко","Манго"]}];
+                render();
             }
         }
 
-        function toggleFav(e, id) {
-            e.stopPropagation();
-            if(favs.includes(id)) favs = favs.filter(i => i !== id);
-            else {
-                favs.push(id);
-                tg.HapticFeedback.impactOccurred('light');
-            }
-            localStorage.setItem('my_favs', JSON.stringify(favs));
-            init();
+        function render() {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = products.map(p => {
+                const isFav = favs.includes(p.id) ? 'active' : '';
+                return `
+                    <div class="card" onclick="openProduct(${p.id})">
+                        <span class="fav-btn ${isFav}" onclick="event.stopPropagation(); toggleFav(${p.id})">❤</span>
+                        <img src="${p.img}">
+                        <h3>${p.name}</h3>
+                        <div class="price">${p.price} ₽</div>
+                    </div>
+                `}).join('');
         }
 
         function openProduct(id) {
-            selectedItem = data.find(i => i.id === id);
-            document.getElementById('m-title').innerText = selectedItem.name;
-            const container = document.getElementById('flavors-container');
-            container.innerHTML = '';
-            
-            selectedItem.flavors.forEach((f, idx) => {
-                container.innerHTML += `
-                    <div class="flavor-option ${idx===0?'selected':''}" onclick="selectFlavor(this)">
-                        <span>${f}</span>
-                        <span style="font-size: 12px; color: var(--accent);">✓</span>
-                    </div>
-                `;
-            });
-            
+            selectedProduct = products.find(p => p.id === id);
+            document.getElementById('m-name').innerText = selectedProduct.name;
+            const flavorsDiv = document.getElementById('m-flavors');
+            flavorsDiv.innerHTML = selectedProduct.flavors.map((f, i) => `
+                <div class="flavor-item ${i===0?'selected':''}" onclick="selectFlavor(this)">
+                    <span>${f}</span>
+                    <span>✓</span>
+                </div>
+            `).join('');
             document.getElementById('overlay').style.display = 'block';
-            document.getElementById('modal').classList.add('open');
+            document.getElementById('modal').classList.add('active');
         }
 
         function selectFlavor(el) {
-            document.querySelectorAll('.flavor-option').forEach(opt => opt.classList.remove('selected'));
+            document.querySelectorAll('.flavor-item').forEach(i => i.classList.remove('selected'));
             el.classList.add('selected');
             tg.HapticFeedback.selectionChanged();
         }
 
+        function confirmAdd() {
+            const flavor = document.querySelector('.flavor-item.selected span').innerText;
+            cart.push({...selectedProduct, flavor});
+            updateCart();
+            closeModal();
+            tg.HapticFeedback.notificationOccurred('success');
+        }
+
+        function updateCart() {
+            const bar = document.getElementById('cart-bar');
+            bar.style.display = cart.length ? 'flex' : 'none';
+            document.getElementById('cart-count').innerText = cart.length;
+            const total = cart.reduce((s, i) => s + i.price, 0);
+            document.getElementById('cart-total').innerText = total + ' ₽ ❯';
+        }
+
+        function toggleFav(id) {
+            if(favs.includes(id)) favs = favs.filter(i => i !== id);
+            else favs.push(id);
+            localStorage.setItem('favs', JSON.stringify(favs));
+            render();
+            tg.HapticFeedback.impactOccurred('light');
+        }
+
         function closeModal() {
             document.getElementById('overlay').style.display = 'none';
-            document.getElementById('modal').classList.remove('open');
+            document.getElementById('modal').classList.remove('active');
         }
 
-        function toggleProfile(show) {
-            document.getElementById('profile').classList.toggle('open', show);
-            tg.HapticFeedback.impactOccurred('medium');
+        function openProfile() { document.getElementById('profile-screen').classList.add('active'); }
+        function closeProfile() { document.getElementById('profile-screen').classList.remove('active'); }
+
+        // Юзер из ТГ
+        if(tg.initDataUnsafe?.user) {
+            const u = tg.initDataUnsafe.user;
+            document.getElementById('user-name').innerText = u.first_name;
+            document.getElementById('avatar').innerText = u.first_name[0].toUpperCase();
         }
 
-        function confirmSelection() {
-            const flavor = document.querySelector('.flavor-option.selected span').innerText;
-            tg.showPopup({ title: 'Корзина', message: `Вы выбрали ${selectedItem.name} со вкусом ${flavor}` });
-            closeModal();
-        }
-
-        init();
+        fetchProducts();
     </script>
 </body>
 </html>
