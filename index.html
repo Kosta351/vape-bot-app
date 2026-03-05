@@ -3,66 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bermuda Shop</title>
+    <title>Bermuda Premium</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #08090a; --card: #121316; --accent: #007aff; --text: #ffffff; --muted: #8e8e93; --glass: rgba(255, 255, 255, 0.05); }
-        body { background: var(--bg); color: var(--text); font-family: 'Manrope', sans-serif; margin: 0; padding: 20px; padding-bottom: 120px; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .card { background: var(--card); border-radius: 24px; padding: 12px; border: 1px solid var(--glass); position: relative; }
-        .card img { width: 100%; aspect-ratio: 1; border-radius: 18px; object-fit: cover; }
-        .price { font-weight: 800; color: var(--accent); font-size: 17px; margin-top: 5px; }
-        .cart-bar { position: fixed; bottom: 30px; left: 20px; right: 20px; background: var(--accent); padding: 20px; border-radius: 22px; display: none; justify-content: space-between; font-weight: 800; z-index: 1000; box-shadow: 0 10px 40px rgba(0,122,255,0.3); }
-        .screen { position: fixed; top: 0; left: 100%; width: 100%; height: 100%; background: var(--bg); z-index: 2000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); padding: 25px; box-sizing: border-box; overflow-y: auto; }
+        :root {
+            --bg: #000000;
+            --card: #111111;
+            --accent: #007aff;
+            --text: #ffffff;
+            --muted: #8e8e93;
+            --glass: rgba(255, 255, 255, 0.04);
+            --border: rgba(255, 255, 255, 0.08);
+        }
+
+        body {
+            background: var(--bg); color: var(--text);
+            font-family: 'Inter', sans-serif; margin: 0; padding: 20px;
+            overflow-x: hidden; -webkit-tap-highlight-color: transparent;
+        }
+
+        /* HEADER */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .logo { font-size: 28px; font-weight: 900; letter-spacing: -1.5px; margin: 0; }
+        .profile-trigger {
+            background: var(--glass); border: 1px solid var(--border);
+            padding: 8px 15px; border-radius: 20px; display: flex; align-items: center; gap: 10px;
+        }
+        .avatar { width: 28px; height: 28px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 900; }
+
+        /* GRID */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .card {
+            background: var(--card); border-radius: 28px; padding: 12px;
+            border: 1px solid var(--border); transition: 0.3s; position: relative;
+        }
+        .card:active { transform: scale(0.96); }
+        .card img { width: 100%; aspect-ratio: 1; border-radius: 20px; object-fit: cover; }
+        .card h3 { font-size: 15px; margin: 10px 0 5px; font-weight: 700; }
+        .price { color: var(--accent); font-weight: 900; font-size: 17px; }
+
+        /* SCREENS (CART & PROFILE) */
+        .screen {
+            position: fixed; top: 0; left: 100%; width: 100%; height: 100vh;
+            background: var(--bg); z-index: 2000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 25px; box-sizing: border-box; overflow-y: auto;
+        }
         .screen.active { left: 0; }
-        .cart-item { background: var(--card); padding: 15px; border-radius: 18px; margin-bottom: 12px; display: flex; justify-content: space-between; border: 1px solid var(--glass); }
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; z-index: 3000; }
-        .modal { position: fixed; bottom: -100%; left: 0; width: 100%; background: #161618; border-radius: 35px 35px 0 0; padding: 35px; box-sizing: border-box; transition: 0.4s ease; z-index: 3001; }
+        .nav-back { color: var(--accent); font-weight: 800; border: none; background: none; margin-bottom: 30px; padding: 0; font-size: 14px; }
+
+        .list-item {
+            background: var(--card); padding: 18px; border-radius: 22px;
+            margin-bottom: 12px; border: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        /* BAR */
+        .cart-bar {
+            position: fixed; bottom: 25px; left: 15px; right: 15px;
+            background: var(--accent); padding: 20px; border-radius: 24px;
+            display: none; justify-content: space-between; font-weight: 900;
+            z-index: 1000; box-shadow: 0 15px 40px rgba(0, 122, 255, 0.4);
+        }
+
+        /* MODAL */
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; z-index: 3000; }
+        .modal {
+            position: fixed; bottom: -100%; left: 0; width: 100%;
+            background: #0a0a0a; border-radius: 35px 35px 0 0;
+            padding: 35px; box-sizing: border-box; transition: 0.4s; z-index: 3001;
+        }
         .modal.active { bottom: 0; }
-        .flavor-btn { background: var(--glass); padding: 16px; border-radius: 16px; margin-bottom: 10px; display: flex; justify-content: space-between; border: 1px solid transparent; }
-        .flavor-btn.active { border-color: var(--accent); background: rgba(0,122,255,0.15); }
-        .main-btn { background: var(--accent); color: white; border: none; width: 100%; padding: 20px; border-radius: 20px; font-weight: 800; font-size: 16px; margin-top: 25px; }
+        .f-btn { background: var(--glass); padding: 18px; border-radius: 18px; margin-bottom: 10px; display: flex; justify-content: space-between; border: 1px solid transparent; font-weight: 700; }
+        .f-btn.active { border-color: var(--accent); background: rgba(0,122,255,0.1); }
+
+        .btn-pay { background: var(--accent); color: #fff; border: none; width: 100%; padding: 22px; border-radius: 22px; font-weight: 900; font-size: 16px; margin-top: 25px; }
     </style>
 </head>
 <body>
 
     <div id="home">
-        <h1 style="font-weight: 800; margin-bottom: 25px;">Bermuda Shop</h1>
-        <div class="grid" id="products"></div>
+        <div class="header">
+            <h1 class="logo">Bermuda</h1>
+            <div class="profile-trigger" onclick="openScreen('prof-scr')">
+                <div class="avatar" id="ava">K</div>
+                <span id="name" style="font-weight: 700;">Костя</span>
+            </div>
+        </div>
+        <div class="grid" id="grid"></div>
     </div>
 
-    <!-- Корзина -->
+    <!-- КОРЗИНА -->
     <div class="screen" id="cart-scr">
-        <div onclick="closeCart()" style="color: var(--accent); font-weight: 800; margin-bottom: 30px;">❮ МАГАЗИН</div>
-        <h2 style="font-size: 32px; font-weight: 800; margin-bottom: 25px;">Корзина</h2>
-        <div id="cart-list"></div>
-        <div id="total-text" style="text-align: right; font-size: 22px; font-weight: 800; margin-top: 25px; color: var(--accent);"></div>
-        <button class="main-btn" onclick="sendOrder()">ОФОРМИТЬ И ОПЛАТИТЬ</button>
+        <button class="nav-back" onclick="closeScreen('cart-scr')">❮ НАЗАД В МАГАЗИН</button>
+        <h2 style="font-size: 32px; font-weight: 900; margin-bottom: 25px;">Корзина</h2>
+        <div id="cart-items"></div>
+        <div id="total" style="text-align: right; font-size: 24px; font-weight: 900; margin-top: 25px; color: var(--accent);">0 ₽</div>
+        <button class="btn-pay" onclick="checkout()">ОФОРМИТЬ И ОПЛАТИТЬ</button>
     </div>
 
-    <div class="cart-bar" id="bar" onclick="openCart()">
-        <span>КОРЗИНА: <span id="b-cnt">0</span></span>
-        <span id="b-tot">0 ₽ ❯</span>
+    <!-- ПРОФИЛЬ -->
+    <div class="screen" id="prof-scr">
+        <button class="nav-back" onclick="closeScreen('prof-scr')">❮ НАЗАД</button>
+        <h2 style="font-size: 32px; font-weight: 900;">Кабинет</h2>
+        <div class="list-item"><span>🛍 Мои заказы</span><b>0</b></div>
+        <div class="list-item"><span>⭐ Избранное</span><b>0</b></div>
     </div>
 
-    <!-- Модалка вкуса -->
-    <div class="modal-overlay" id="overlay" onclick="closeModal()"></div>
+    <div class="cart-bar" id="bar" onclick="openScreen('cart-scr')">
+        <span>КОРЗИНА: <span id="b-count">0</span> ШТ.</span>
+        <span id="b-total">0 ₽ ❯</span>
+    </div>
+
+    <div class="overlay" id="overlay" onclick="closeModal()"></div>
     <div class="modal" id="modal">
-        <h2 id="m-name" style="margin: 0 0 20px; font-size: 24px;">Вкус</h2>
-        <div id="m-flavors"></div>
-        <button class="main-btn" onclick="confirmAdd()">В КОРЗИНУ</button>
+        <h2 id="m-name" style="margin-top: 0; font-size: 24px; font-weight: 900;">Вкус</h2>
+        <div id="m-flavs"></div>
+        <button class="btn-pay" onclick="addFinal()">ДОБАВИТЬ</button>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.expand();
-        
-        let products = [];
-        let cart = [];
-        let cur = null;
+        let products = [], cart = [], cur = null;
 
-        // ВАЖНО: Замени на адрес из ngrok при тесте на телефоне!
+        // ВАЖНО: При тесте на телефоне замени на URL из ngrok
         const API = 'http://localhost:8080/api/products';
 
         async function load() {
@@ -70,68 +134,65 @@
                 const r = await fetch(API);
                 products = await r.json();
             } catch(e) {
-                products = [{id:1, name:"DEMO", price:450, img:"https://via.placeholder.com/300", flavors:["Вкус 1","Вкус 2"]}];
+                products = [{id:1, name:"DEMO VAPE", price:450, img:"https://via.placeholder.com/300", flavors:["Манго","Ананас"]}];
             }
             render();
         }
 
         function render() {
-            document.getElementById('products').innerHTML = products.map(p => `
-                <div class="card" onclick="openProduct(${p.id})">
+            document.getElementById('grid').innerHTML = products.map(p => `
+                <div class="card" onclick="openProd(${p.id})">
                     <img src="${p.img}">
-                    <div style="font-weight: 600; margin-top: 10px;">${p.name}</div>
+                    <h3>${p.name}</h3>
                     <div class="price">${p.price} ₽</div>
                 </div>
             `).join('');
         }
 
-        function openProduct(id) {
+        function openProd(id) {
             cur = products.find(p => p.id === id);
             document.getElementById('m-name').innerText = cur.name;
-            document.getElementById('m-flavors').innerHTML = cur.flavors.map((f, i) => `
-                <div class="flavor-btn ${i===0?'active':''}" onclick="selF(this)"><span>${f}</span></div>
+            document.getElementById('m-flavs').innerHTML = cur.flavors.map((f, i) => `
+                <div class="f-btn ${i===0?'active':''}" onclick="selF(this)"><span>${f}</span></div>
             `).join('');
             document.getElementById('overlay').style.display = 'block';
             document.getElementById('modal').classList.add('active');
+            tg.HapticFeedback.impactOccurred('medium');
         }
 
-        function selF(el) { document.querySelectorAll('.flavor-btn').forEach(b => b.classList.remove('active')); el.classList.add('active'); }
+        function selF(el) { document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('active')); el.classList.add('active'); tg.HapticFeedback.selectionChanged(); }
 
-        function confirmAdd() {
-            const f = document.querySelector('.flavor-btn.active span').innerText;
+        function addFinal() {
+            const f = document.querySelector('.f-btn.active span').innerText;
             cart.push({ name: cur.name, price: cur.price, flavor: f });
-            updateBar(); closeModal(); tg.HapticFeedback.impactOccurred('medium');
+            updateBar(); closeModal(); tg.HapticFeedback.notificationOccurred('success');
         }
 
         function updateBar() {
             const b = document.getElementById('bar');
             b.style.display = cart.length ? 'flex' : 'none';
-            document.getElementById('b-cnt').innerText = cart.length;
-            document.getElementById('b-tot').innerText = cart.reduce((s, i) => s + i.price, 0) + ' ₽ ❯';
+            document.getElementById('b-count').innerText = cart.length;
+            const total = cart.reduce((s, i) => s + i.price, 0);
+            document.getElementById('b-total').innerText = total + ' ₽ ❯';
         }
 
-        function openCart() {
-            document.getElementById('cart-list').innerHTML = cart.map(i => `
-                <div class="cart-item">
-                    <div><b>${i.name}</b><br><small>${i.flavor}</small></div>
-                    <b>${i.price} ₽</b>
-                </div>
-            `).join('');
-            document.getElementById('total-text').innerText = 'Итого: ' + cart.reduce((s, i) => s + i.price, 0) + ' ₽';
-            document.getElementById('cart-scr').classList.add('active');
+        function openScreen(id) {
+            if(id === 'cart-scr') {
+                document.getElementById('cart-items').innerHTML = cart.map(i => `<div class="list-item"><div><b>${i.name}</b><br><small style="color:var(--muted)">${i.flavor}</small></div><b>${i.price} ₽</b></div>`).join('');
+                document.getElementById('total').innerText = cart.reduce((s, i) => s + i.price, 0) + ' ₽';
+            }
+            document.getElementById(id).classList.add('active');
         }
 
-        // ОТПРАВКА ДАННЫХ БОТУ
-        function sendOrder() {
-            if(!cart.length) return;
-            tg.sendData(JSON.stringify(cart));
-            tg.close(); // Закрываем Mini App
-        }
-
+        function closeScreen(id) { document.getElementById(id).classList.remove('active'); }
         function closeModal() { document.getElementById('overlay').style.display='none'; document.getElementById('modal').classList.remove('active'); }
-        function openCart() { openCart(); /* вызывается выше через DOM */ }
-        function closeCart() { document.getElementById('cart-scr').classList.remove('active'); }
+        function checkout() { if(cart.length) tg.sendData(JSON.stringify(cart)); }
 
+        if(tg.initDataUnsafe?.user) {
+            const u = tg.initDataUnsafe.user;
+            document.getElementById('name').innerText = u.first_name;
+            document.getElementById('ava').innerText = u.first_name[0].toUpperCase();
+        }
         load();
     </script>
 </body>
